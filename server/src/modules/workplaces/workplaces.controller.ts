@@ -55,5 +55,18 @@ export class WorkplacesController {
       data: data.map(omitShard),
       links: { next: nextLink({ nextPage, request }) },
     };
+  @Get("most-active")
+async getMostActive(
+  @Query("from") from?: string,
+  @Query("to") to?: string,
+  @Query("limit") limitStr?: string,
+) {
+  const limit = limitStr ? parseInt(limitStr) : 10;
+
+  const data = await this.service.getMostActive({ from, to, limit });
+
+  return { data };
+}
+
   }
 }
