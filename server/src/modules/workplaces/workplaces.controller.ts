@@ -1,11 +1,23 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  Query,
+} from "@nestjs/common";
 import { Workplace } from "@prisma/client";
 import { Request } from "express";
 
 import { nextLink, omitShard, PaginationPage } from "../shared/pagination";
-import { type Page, PaginatedResponse, type Response } from "../shared/shared.types";
-import { type CreateWorkplace } from "./workplaces.schemas";
-import { WorkplaceDTO } from "./workplaces.schemas";
+import {
+  type Page,
+  PaginatedResponse,
+  type Response,
+} from "../shared/shared.types";
+import { type CreateWorkplace, WorkplaceDTO } from "./workplaces.schemas";
 import { WorkplacesService } from "./workplaces.service";
 
 @Controller("workplaces")
@@ -14,8 +26,6 @@ export class WorkplacesController {
 
   /**
    * Creates a new workplace
-   * @param data - The workplace data to create
-   * @returns The created workplace
    */
   @Post()
   async create(@Body() data: CreateWorkplace): Promise<Response<Workplace>> {
@@ -23,13 +33,12 @@ export class WorkplacesController {
   }
 
   /**
-   * Retrieves a workplace by its ID
-   * @param id - The workplace ID
-   * @returns The workplace data
-   * @throws Error when workplace is not found
+   * Retrieves a workplace by ID
    */
   @Get("/:id")
-  async getById(@Param("id", ParseIntPipe) id: number): Promise<Response<WorkplaceDTO>> {
+  async getById(
+    @Param("id", ParseIntPipe) id: number,
+  ): Promise<Response<WorkplaceDTO>> {
     const data = await this.service.getById(id);
     if (!data) {
       throw new Error(`ID ${id} not found.`);
@@ -40,9 +49,6 @@ export class WorkplacesController {
 
   /**
    * Retrieves a paginated list of workplaces
-   * @param request - The HTTP request object
-   * @param page - Pagination parameters
-   * @returns Paginated list of workplaces
    */
   @Get()
   async get(
@@ -55,18 +61,19 @@ export class WorkplacesController {
       data: data.map(omitShard),
       links: { next: nextLink({ nextPage, request }) },
     };
+  }
+
+  /**
+   * Retrieves the most active workplaces
+   */
   @Get("most-active")
-async getMostActive(
-  @Query("from") from?: string,
-  @Query("to") to?: string,
-  @Query("limit") limitStr?: string,
-) {
-  const limit = limitStr ? parseInt(limitStr) : 10;
-
-  const data = await this.service.getMostActive({ from, to, limit });
-
-  return { data };
-}
-
+  async getMostActive(
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+    @Query("limit") limitStr?: string,
+  ) {
+    const limit = limitStr ? parseInt(limitStr) : 10;
+    const data = await this.service.getMostActive({ from, to, limit });
+    return { data };
   }
 }
