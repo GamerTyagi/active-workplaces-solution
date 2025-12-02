@@ -25,6 +25,20 @@ export class WorkplacesController {
   constructor(private readonly service: WorkplacesService) {}
 
   /**
+   * ⭐ Most active workplaces FIRST (to avoid conflict with /:id)
+   */
+  @Get("most-active")
+  async getMostActive(
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+    @Query("limit") limitStr?: string,
+  ) {
+    const limit = limitStr ? parseInt(limitStr) : 10;
+    const data = await this.service.getMostActive({ from, to, limit });
+    return { data };
+  }
+
+  /**
    * Creates a new workplace
    */
   @Post()
@@ -61,19 +75,5 @@ export class WorkplacesController {
       data: data.map(omitShard),
       links: { next: nextLink({ nextPage, request }) },
     };
-  }
-
-  /**
-   * Retrieves the most active workplaces
-   */
-  @Get("most-active")
-  async getMostActive(
-    @Query("from") from?: string,
-    @Query("to") to?: string,
-    @Query("limit") limitStr?: string,
-  ) {
-    const limit = limitStr ? parseInt(limitStr) : 10;
-    const data = await this.service.getMostActive({ from, to, limit });
-    return { data };
   }
 }
